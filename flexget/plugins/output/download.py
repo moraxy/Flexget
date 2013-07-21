@@ -248,11 +248,12 @@ class PluginDownload(object):
 
         # download and write data into a temp file
         # generate temp file using stdlib based on user's config setting
-        temp = task.config['download'].get('temp', False)
-        if temp:
-            tmp_path = temp
-        else:
-            tmp_path = os.path.join(task.manager.config_base, 'temp')
+        tmp_path = os.path.join(task.manager.config_base, 'temp')
+        if isinstance(task.config['download'], dict):
+            tmp_path = task.config['download'].get('temp', tmp_path)
+            
+        if not os.access(tmp_path, os.W_OK):
+            raise PluginError('Not allowed to write to temp directory `%s`' % tmp_path)
 
         if not os.path.isdir(tmp_path):
             log.debug('creating tmp_path %s' % tmp_path)
